@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7f4">
+  <meta name="description" content="A personal directory for transport routes, stations, fleets and networks.">
+  <title>Transport Database</title>
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Transit Index">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+  <script src="data.js" defer></script>
+  <script src="live.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#home" aria-label="Transport Database home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="9" y="8" width="22" height="21" rx="6"/><rect x="13" y="12" width="14" height="7" rx="2"/><path d="M13 33l-3.5 4M27 33l3.5 4"/><circle cx="14.5" cy="24" r="1.3" fill="#fff" stroke="none"/><circle cx="25.5" cy="24" r="1.3" fill="#fff" stroke="none"/><circle cx="32" cy="8" r="3.4" fill="#ffd36e" stroke="#087e78" stroke-width="1.6"/></svg></span>
+        <span class="brand-copy"><strong>Transit<span>Index</span></strong><small>Transport database</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="primary-nav">
+        <a class="nav-link active" href="#home" data-home-link><span class="nav-icon">⌂</span>Overview</a>
+      </nav>
+      <div class="nav-label section-label">DATABASES</div>
+      <nav class="category-nav" id="sidebar-categories" aria-label="Transport categories"></nav>
+      <div class="sidebar-bottom">
+        <div class="network-card"><span class="network-dot"></span><div><strong>Network directory</strong><small>Stepford · Croydon</small></div><span class="network-arrow">↗</span></div>
+        <div class="sidebar-foot"><span class="status-dot"></span>Personal transport index</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <a class="collapsed-brand" href="#home" aria-label="Transport Database home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="9" y="8" width="22" height="21" rx="6"/><rect x="13" y="12" width="14" height="7" rx="2"/><path d="M13 33l-3.5 4M27 33l3.5 4"/><circle cx="14.5" cy="24" r="1.3" fill="#fff" stroke="none"/><circle cx="25.5" cy="24" r="1.3" fill="#fff" stroke="none"/><circle cx="32" cy="8" r="3.4" fill="#ffd36e" stroke="#087e78" stroke-width="1.6"/></svg></span><span class="brand-copy"><strong>Transit<span>Index</span></strong><small>Transport database</small></span></a>
+        <div class="breadcrumbs" id="breadcrumbs"><span>Workspace</span><span class="crumb-slash">/</span><strong>Overview</strong></div>
+        <div class="topbar-right"><span class="local-badge"><span class="status-dot"></span>YOUR DIRECTORY</span><span class="profile-caption" id="profile-caption"></span><button class="avatar" id="profile-button" aria-label="Open profile settings">TD</button></div>
+      </header>
+      <div id="app-view" tabindex="-1"></div>
+      <footer class="page-footer"><span>TRANSPORT INDEX <span class="footer-sep">•</span> BUILT FOR THE JOURNEY</span><span>Roblox networks · TfL · Mainline Rail</span></footer>
+    </main>
+    <button class="ask-chatgpt-button" type="button" id="ask-chatgpt" title="Ask ChatGPT" aria-label="Ask ChatGPT">Ask ChatGPT ↗</button>
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">&lt;</button>
+  </div>
+  <dialog class="profile-dialog" id="profile-dialog" aria-labelledby="profile-title">
+    <form id="profile-form" method="dialog">
+      <div class="dialog-top"><div><div class="eyebrow"><span class="eyebrow-line"></span>PERSONALISE</div><h2 id="profile-title">Your profile</h2></div><button class="dialog-close" type="button" id="profile-close" aria-label="Close profile settings">×</button></div>
+      <p class="dialog-intro">Choose how your transport directory looks to you. Your settings stay in this browser.</p><p class="profile-save-status" id="profile-save-status" role="status" hidden></p>
+      <label class="field-label" for="profile-name">Display name</label><input class="profile-input" id="profile-name" name="name" maxlength="32" placeholder="Your name" autocomplete="name">
+      <label class="field-label" for="profile-handle">Short profile label</label><input class="profile-input" id="profile-handle" name="handle" maxlength="24" placeholder="e.g. railfan27">
+      <div class="profile-picture-heading"><label class="field-label" for="profile-picture-picker">Profile picture</label><button class="profile-picture-clear" type="button" id="profile-picture-clear">Use initials</button></div>
+      <p class="profile-picture-hint">Choose a transport photo or upload your own picture. Your photo stays on this device.</p>
+      <div class="friend-share-actions profile-upload-actions"><button class="button-secondary" type="button" id="profile-picture-upload">Upload a picture</button><input type="file" id="profile-picture-file" accept="image/jpeg,image/png,image/webp" hidden></div>
+      <div class="profile-upload-preview" id="profile-upload-preview" hidden><img id="profile-upload-preview-image" alt="Selected profile picture"><span id="profile-upload-preview-name"></span></div>
+      <div class="profile-picture-picker" id="profile-picture-picker" aria-label="Choose a profile picture"></div>
+      <label class="field-label">Accent colour</label><div class="color-options" role="group" aria-label="Choose an accent colour"><button type="button" class="color-swatch" data-color="#087e78" aria-label="Teal"></button><button type="button" class="color-swatch" data-color="#4267a8" aria-label="Blue"></button><button type="button" class="color-swatch" data-color="#a45b7a" aria-label="Rose"></button><button type="button" class="color-swatch" data-color="#bd7438" aria-label="Amber"></button></div>
+      <section class="offline-friends" aria-labelledby="offline-friends-title">
+        <div class="profile-picture-heading"><div><label class="field-label" id="offline-friends-title">Friends · offline sharing</label><p class="profile-picture-hint">Share a friend code or profile file. Friends are saved on this device; the app has no live online connection.</p></div></div>
+        <div class="friend-share-actions"><button class="button-secondary" type="button" id="copy-friend-code">Copy my friend code</button><button class="button-secondary" type="button" id="import-friend-card">Add friend from file</button><input type="file" id="friend-card-file" accept=".json,application/json" hidden></div>
+        <label class="field-label" for="friend-code-input">Friend code</label><textarea class="profile-input record-textarea friend-code-input" id="friend-code-input" rows="3" placeholder="Paste a friend's code here"></textarea>
+        <div class="friend-share-actions"><button class="button-secondary" type="button" id="add-friend-code">Add friend from code</button><button class="button-secondary" type="button" id="export-friend-card">Download profile card</button></div>
+        <div class="offline-friend-list" id="offline-friend-list" aria-live="polite"></div>
+      </section>
+      <section class="backup-section" aria-labelledby="backup-section-title">
+        <label class="field-label" id="backup-section-title">Backup &amp; restore</label>
+        <p class="profile-picture-hint">Save a backup of your profile, friends, edits and custom routes, or restore them on this device.</p>
+        <div class="friend-share-actions"><button class="button-secondary" type="button" id="export-app-backup">Download backup</button><button class="button-secondary" type="button" id="import-app-backup">Restore from backup</button><input type="file" id="app-backup-file" accept=".json,application/json" hidden></div>
+        <p class="profile-save-status" id="backup-status" role="status" hidden></p>
+      </section>
+      <div class="dialog-actions"><button class="button-secondary" type="button" id="profile-reset">Reset</button><button class="button-primary" type="submit">Save profile</button></div>
+    </form>
+  </dialog>
+  <dialog class="profile-dialog record-dialog" id="record-dialog" aria-labelledby="record-dialog-title">
+    <form id="record-form" method="dialog">
+      <div class="dialog-top"><div><div class="eyebrow"><span class="eyebrow-line"></span>DATABASE ENTRY</div><h2 id="record-dialog-title">Add an entry</h2></div><button class="dialog-close" type="button" id="record-close" aria-label="Close entry editor">×</button></div>
+      <p class="dialog-intro">Add or update a record in this category. Keep a source link so you can check the details later.</p>
+      <label class="field-label" for="record-title">Name or title</label><input class="profile-input" id="record-title" name="title" maxlength="100" required placeholder="e.g. Stepford Central">
+      <label class="field-label" for="record-operator">Operator or subcategory</label><input class="profile-input" id="record-operator" name="operator" maxlength="80" placeholder="e.g. Stepford Connect">
+      <label class="field-label" for="record-status">Status (optional)</label><input class="profile-input" id="record-status" name="status" maxlength="50" placeholder="e.g. Current, former, or withdrawn">
+      <label class="field-label" for="record-axis">Usual route direction</label><select class="profile-input" id="record-axis" name="axis"><option value="north-south">North to South</option><option value="west-east">West to East</option></select>
+      <label class="field-label" for="record-details">Details</label><textarea class="profile-input record-textarea" id="record-details" name="details" maxlength="1800" rows="6" placeholder="Add useful facts, one per line"></textarea>
+      <label class="field-label" for="record-image-url">Image URL or uploaded picture (optional)</label><input class="profile-input" id="record-image-url" name="imageUrl" type="text" placeholder="Paste an image link, or paste/upload a picture below">
+      <div class="record-image-upload-row"><button class="button-secondary" id="record-image-upload" type="button">Upload from this device</button><input type="file" id="record-image-file" accept="image/jpeg,image/png,image/webp" hidden><span id="record-image-upload-status" role="status">Or copy an image, then press Ctrl+V while this editor is open.</span></div>
+      <img id="record-image-preview" class="record-image-edit-preview" alt="Image preview" hidden>
+      <label class="field-label" for="record-stops">Stops or calling points</label><textarea class="profile-input record-textarea" id="record-stops" name="stops" maxlength="5000" rows="4" placeholder="One stop per line; for route measurement use Stop name | latitude | longitude"></textarea>
+      <label class="field-label" for="record-source-title">Source name</label><input class="profile-input" id="record-source-title" name="sourceTitle" maxlength="100" placeholder="e.g. Station page · Fandom wiki">
+      <label class="field-label" for="record-source-url">Source link</label><input class="profile-input" id="record-source-url" name="sourceUrl" type="url" placeholder="https://…">
+      <label class="field-label" for="record-directory-title">Directory name</label><input class="profile-input" id="record-directory-title" name="directoryTitle" maxlength="100" placeholder="e.g. Stepford Connect routes directory">
+      <label class="field-label" for="record-directory-url">Directory link</label><input class="profile-input" id="record-directory-url" name="directoryUrl" type="url" placeholder="https://…">
+      <div class="dialog-actions"><button class="button-secondary" type="button" id="record-cancel">Cancel</button><button class="button-primary" type="submit">Save entry</button></div>
+    </form>
+  </dialog>
+  <dialog class="profile-dialog detail-dialog" id="record-detail-dialog" aria-labelledby="detail-title">
+    <div id="record-detail-content"></div>
+  </dialog>
+  <dialog class="photo-viewer-dialog" id="photo-viewer-dialog" aria-labelledby="photo-viewer-title">
+    <div class="photo-viewer-top"><strong id="photo-viewer-title">Full photo</strong><button class="dialog-close" id="photo-viewer-close" type="button" aria-label="Close full photo">×</button></div>
+    <img id="photo-viewer-image" alt="">
+    <a id="photo-viewer-source" href="#" target="_blank" rel="noopener noreferrer" hidden>Open image source ↗</a>
+  </dialog>
+  <dialog class="profile-dialog delete-dialog" id="delete-confirm-dialog" aria-labelledby="delete-confirm-title">
+    <div class="dialog-top"><div><div class="eyebrow"><span class="eyebrow-line"></span>CONFIRM ACTION</div><h2 id="delete-confirm-title">Delete this entry?</h2></div></div>
+    <p class="dialog-intro" id="delete-confirm-message">This entry will be removed from your saved directory.</p>
+    <div class="dialog-actions"><button class="button-secondary" type="button" id="delete-cancel">Cancel</button><button class="button-danger" type="button" id="delete-confirm">Delete entry</button></div>
+  </dialog>
+</body>
+</html>
